@@ -27,32 +27,14 @@ data = data.fillna(0)  # Thay thế giá trị thiếu bằng 0 (có thể thay 
 features = data.drop(columns=['loan_status'])
 target = data['loan_status']
 
-# Chia dữ liệu thành tập huấn luyện và kiểm tra (80% train, 20% test)
-X_train, X_test, y_train, y_test = train_test_split(features, target, test_size=0.2, random_state=42)
-
 # Chuẩn hóa dữ liệu (Standard Scaling cho các giá trị số)
 scaler = StandardScaler()
-X_train = scaler.fit_transform(X_train)
-X_test = scaler.transform(X_test)
+X_train = scaler.fit_transform(features)
 
 # Huấn luyện Logistic Regression với regularization L2
 model = LogisticRegression(penalty='l2', C=1.0, random_state=42, max_iter=1000)
-model.fit(X_train, y_train)
+model.fit(X_train, target)
 
-# Dự đoán trên tập test
-y_pred = model.predict(X_test)
-
-# Đánh giá mô hình
-accuracy = accuracy_score(y_test, y_pred)
-print(f"Accuracy: {accuracy:.2f}")
-
-print("\nClassification Report:")
-print(classification_report(y_test, y_pred))
-
-print("\nConfusion Matrix:")
-print(confusion_matrix(y_test, y_pred))
-
-# TEST
 # Đọc file test.csv
 test_data = pd.read_csv('test.csv')
 
