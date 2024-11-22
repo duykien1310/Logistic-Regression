@@ -3,20 +3,34 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.preprocessing import StandardScaler, LabelEncoder
 
-# Đọc tập dữ liệu (giả định bạn có file CSV 'loan_data.csv')
-# Chỉnh sửa đường dẫn và cột tùy thuộc vào dữ liệu của bạn
+# Đọc tập dữ liệu
 data = pd.read_csv('train.csv')
 
-# Giả định tập dữ liệu có các cột features và một cột 'target' (1: cho vay, 0: không cho vay)
+# Xử lý dữ liệu phân loại (label encoding cho các cột phân loại)
+categorical_columns = [
+    'person_gender',
+    'person_education',
+    'person_home_ownership',
+    'loan_intent',
+    'previous_loan_defaults_on_file'
+]
+
+for col in categorical_columns:
+    data[col] = LabelEncoder().fit_transform(data[col])
+
+# Xử lý dữ liệu thiếu (nếu có)
+data = data.fillna(0)  # Thay thế giá trị thiếu bằng 0 (có thể thay đổi tùy thuộc vào logic của bạn)
+
+# Tách features và target
 features = data.drop(columns=['loan_status'])
 target = data['loan_status']
 
 # Chia dữ liệu thành tập huấn luyện và kiểm tra (80% train, 20% test)
 X_train, X_test, y_train, y_test = train_test_split(features, target, test_size=0.2, random_state=42)
 
-# Chuẩn hóa dữ liệu (nếu cần thiết)
-from sklearn.preprocessing import StandardScaler
+# Chuẩn hóa dữ liệu (Standard Scaling cho các giá trị số)
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
@@ -38,8 +52,39 @@ print(classification_report(y_test, y_pred))
 print("\nConfusion Matrix:")
 print(confusion_matrix(y_test, y_pred))
 
-# Nếu muốn kiểm tra kết quả với một đối tượng mới (ví dụ)
-new_data = np.array([[...]])  # Thay thế bằng dữ liệu của đối tượng cần kiểm tra
-new_data_scaled = scaler.transform(new_data)
-prediction = model.predict(new_data_scaled)
-print(f"Dự đoán: {'Cho vay' if prediction[0] == 1 else 'Không cho vay'}")
+# TEST
+# Đọc file test.csv
+test_data = pd.read_csv('test.csv')
+
+# Xử lý dữ liệu phân loại trên file test.csv giống như train.csv
+for col in categorical_columns:
+    test_data[col] = LabelEncoder().fit_transform(test_data[col])
+
+# Xử lý dữ liệu thiếu (nếu có) trên test.csv
+test_data = test_data.fillna(0)
+
+# Tách features (bỏ cột 'loan_status') và target (nếu muốn so sánh)
+X_test_data = test_data.drop(columns=['loan_status'])
+y_test_data = test_data['loan_status']
+
+# Chuẩn hóa dữ liệu test.csv
+X_test_data_scaled = scaler.transform(X_test_data)
+
+# Dự đoán trên dữ liệu test.csv
+y_test_pred = model.predict(X_test_data_scaled)
+
+# Đánh giá kết quả
+test_accuracy = accuracy_score(y_test_data, y_test_pred)
+print(f"Test Accuracy: {test_accuracy:.2f}")
+
+print("\nClassification Report (Test Data):")
+print(classification_report(y_test_data, y_test_pred))
+
+print("\nConfusion Matrix (Test Data):")
+print(confusion_matrix(y_test_data, y_test_pred))
+
+# In kết quả dự đoán cho từng hàng trong test.csv
+test_data['Prediction'] = y_test_pred
+test_data['Prediction_Label'] = test_data['Prediction'].apply(lambda x: 'Cho vay' if x == 1 else 'Không cho vay')
+print("\nKết quả dự đoán trên file test.csv:")
+print(test_data[['person_age', 'loan_status', 'Prediction_Label']])
