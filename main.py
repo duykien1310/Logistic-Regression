@@ -35,6 +35,41 @@ X_train = scaler.fit_transform(features)
 model = LogisticRegression(penalty='l2', C=1.0, random_state=42, max_iter=1000)
 model.fit(X_train, target)
 
+# Sử dụng solver 'liblinear' hỗ trợ L1 regularization
+# model = LogisticRegression(
+#     penalty='l1',
+#     solver='liblinear',  # Hoặc 'saga' nếu bạn làm việc với dữ liệu lớn hoặc cần hỗ trợ đa lớp
+#     C=1.0,
+#     random_state=42,
+#     max_iter=1000
+# )
+
+# # Huấn luyện mô hình với dữ liệu huấn luyện
+# model.fit(X_train, target)  # Đảm bảo rằng 'y_train' là biến mục tiêu đúng
+
+
+# Sử dụng solver 'saga' hỗ trợ L1 regularization và tốt cho dữ liệu lớn
+# model = LogisticRegression(
+#     penalty='l1',
+#     solver='saga',
+#     C=1.0,
+#     random_state=42,
+#     max_iter=1000
+# )
+
+# model.fit(X_train, target)
+
+# Khởi tạo mô hình Logistic Regression mà không sử dụng regularization
+# model = LogisticRegression(
+#     penalty=None,             # Không sử dụng regularization
+#     random_state=42, 
+#     max_iter=1000,
+#     solver='lbfgs'            # Chọn solver hỗ trợ penalty=None
+# )
+
+# # Huấn luyện mô hình với dữ liệu huấn luyện
+# model.fit(X_train, target)
+
 # Đọc file test.csv
 test_data = pd.read_csv('test.csv')
 
